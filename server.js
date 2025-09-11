@@ -47,7 +47,7 @@ const __dirname = path.dirname(__filename);
 const pool = new pg.Pool({
   user: "postgres",
   password: "root",
-  host: "localhost",
+  host: "192.168.0.131",
   database: "Form_104",
   port: 5432,
   max: 10000,
