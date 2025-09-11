@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Beneficiary Form</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+
+</head>
+<body>
+  <header>
+    <div class="header-bar">
+      <div class="brand">
+        <h1>Bavya Health Services Pvt Ltd</h1>
+        <h1>104 ఆరోగ్యరధం</h1>
+      </div>
+      <div class="actions">
+        <a href="/index.html" class="btn-link">Logout</a> 
+      </div>   
+    </div>
+  </header>
+
+  <!-- <form> -->
+    <form id="beneficiaryForm" method="POST" action="/submit">
+    <fieldset>
+      <legend>👤 Beneficiary Details</legend>
+
+      <label for="name">Name:</label>
+      <input type="text" name="name" id="name" required />
+
+      <label for="dob">Date of Birth:</label>
+      <input type="date" name="dob" id="dob" required />
+
+      <label for="age">Age:</label>
+      <input type="number" name="age" id="age" required readonly style="background:#f5f5f5;" />
+
+      <label  for="gender">Gender:</label>
+      <select name="gender" id="gender" required>
+        <option value="">--Select--</option>
+        <option>Male</option>
+        <option>Female</option>
+        <option>Other</option>
+      </select>
+    </fieldset>
+
+    <fieldset>
+      <legend>💊 Health Information</legend>
+
+      <label for="ncd">NCD:</label>
+      <select name="ncd" id="ncd" required>
+        <option value="">--Select--</option>
+        <option>Diabetes</option>
+        <option>Hypertension</option>
+        <option>Cardiovascular Disease</option>
+        <option>Chronic Respiratory Disease</option>
+        <option>Cancer</option>
+        <option>Asthma</option>
+        <option>Chronic Kidney Disease</option>
+        <option>Stroke</option>
+        <option>Thyroid Disorders</option>
+        <option>Arthritis</option>
+        <option>Obesity</option>
+        <option>Depression</option>
+        <option>Anxiety Disorders</option>
+        <option>Parkinson’s Disease</option>
+        <option>Alzheimer’s Disease</option>
+        <option>Epilepsy</option>
+        <option>Autoimmune Disorders</option>
+        <option>Hepatitis B</option>
+        <option>Hepatitis C</option>
+        <option>Osteoporosis</option>
+        <option>COPD</option>
+        <option>Glaucoma</option>
+        <option>Multiple Sclerosis</option>
+        <option>Psoriasis</option>
+        <option>IBS (Irritable Bowel Syndrome)</option>
+        <option>Migraine</option>
+        <option>PCOS/PCOD</option>
+        <option>Sleep Apnea</option>
+        <option>HIV/AIDS</option>
+      </select>
+
+      <label>Medicines:</label>
+      <div class="medicine-row">
+        <div id="medicineList">
+          <input type="text" name="medicines[]" placeholder="Medicine name" />
+        </div>
+        <button type="button" onclick="addMedicine()" class="add-btn">+</button>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>📄 Identification</legend>
+
+      <label for="aadhaar">Aadhaar Number:</label>
+      <input type="text" name="aadhaar" id="aadhaar" pattern="\d{12}" required />
+    </fieldset>
+
+    <button type="submit" class="btn">Submit</button>
+  </form>
+  <div id="historySection" style="margin-top:20px; display:none;">
+    <h3>Past Records</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>DOB</th>
+          <th>Age</th>
+          <th>Gender</th>
+          <th>NCD</th>
+          <th>Medicines</th>
+          <th>Aadhaar</th>
+          <th>Submitted At</th>
+        </tr>
+      </thead>
+      <tbody id="historyTable"></tbody>
+    </table>
+  </div>
+   <footer>
+    <div class="container">
+      <p>© 2025 Bavya Health Services Pvt Ltd. All rights reserved.</p>
+      <p>Contact us: <a href="mailto:hr@bhspl.in">info@bhspl.in</a></p>
+    </div>
+  </footer>
+
+  <script>
+    function addMedicine() {
+      const medicineList = document.getElementById("medicineList");
+      const input = document.createElement("input");
+      input.type = "text";
+      input.name = "medicines[]";
+      input.placeholder = "Medicine name";
+      medicineList.appendChild(input);
+    }
+
+    async function fetchPastRecords(name) {
+      if (!name) return;
+
+      try {
+        const res = await fetch(`/api/records/${encodeURIComponent(name)}`);
+        const data = await res.json();
+
+        const tableBody = document.getElementById("historyTable");
+        const historySection = document.getElementById("historySection");
+
+        tableBody.innerHTML = "";
+
+        if (data.length === 0) {
+          historySection.style.display = "none";
+          return;
+        }
+
+        historySection.style.display = "block";
+
+        data.forEach(r => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${r.dob || ""}</td>
+            <td>${r.age || ""}</td>
+            <td>${r.gender || ""}</td>
+            <td>${r.ncd || ""}</td>
+            <td>${r.medicines || ""}</td>
+            <td>${r.aadhaar || ""}</td>
+            <td>${r.submittedAt ? new Date(r.submittedAt).toLocaleString() : ""}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+
+      } catch (err) {
+        console.error("Error fetching past records:", err);
+      }
+    }
+
+    document.getElementById('dob').addEventListener('change', function() {
+      const dob = this.value;
+      if (dob) {
+        const today = new Date();
+        const birthDate = new Date(dob);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+          age--;
+        }
+        document.getElementById('age').value = age > 0 ? age : '';
+      } else {
+        document.getElementById('age').value = '';
+      }
+    });
+    document.getElementById("name").addEventListener("blur", e => {
+      fetchPastRecords(e.target.value);
+    });
+  </script>
+</body>
+</html>

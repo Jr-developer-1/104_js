@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Vehicle Login</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <div class="header-bar">
+      <div class="brand">
+        <h1>Bavya Health Services Pvt Ltd</h1>
+        <h1>104 ఆరోగ్యరధం</h1>
+      </div>
+    </div>
+  </header>
+
+  <form id="loginForm" action="/login" method="POST">
+    <label>Usernsame:</label>
+    <input type="text" id="username" name="username" required placeholder="e.g. KA01AB1234" />
+
+    <label>Password (Last 4 digits):</label>
+    <input type="password" id="password" name="password" required />
+
+    <button type="submit" class="btn">Login</button>
+  </form>
+   <footer>
+    <div class="container">
+      <p>© 2025 Bavya Health Services Pvt Ltd. All rights reserved.</p>
+      <p>Contact us: <a href="mailto:hr@bhspl.in">info@bhspl.in</a></p>
+    </div>
+  </footer>
+</body>
+</html>

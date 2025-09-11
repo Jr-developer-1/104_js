@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Existing Users</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <div class="header-bar">
+      <div class="brand">
+        <h1>Bavya Health Services Pvt Ltd</h1>
+        <h1>104 ఆరోగ్యరధం</h1>
+      </div>
+      <div class="actions">
+        <a href="/index.html" class="btn-link">Logout</a>    
+      </div>
+    </div>
+  </header>
+  <!-- Display User List -->
+    <section method="GET" action="/users">
+        <fieldset style="max-width:700px;margin:30px auto;">
+        <legend style="font-size:1.3em;">📋 Existing Users</legend>
+        <input
+            type="text"
+            id="searchUser"
+            placeholder="Search username..."
+            style="margin-bottom:15px;width:100%;padding:8px;font-size:1em;"
+            oninput="filterUsers()"
+        />
+        <div style="overflow-x:auto;">
+            <table id="usersTable" style="width:100%;font-size:1.1em;">
+            <thead>
+                <tr>
+                <th style="background: linear-gradient(90deg, #FFA41B 60%, #FF6F61 100%); color: #fff; padding: 12px 8px;text-align: center;">Username</th>
+                <th style="background: linear-gradient(90deg, #FFA41B 60%, #FF6F61 100%); color: #fff; padding:12px 8px;text-align: center;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- JS will populate this -->
+            </tbody>
+            </table>
+        </div>
+        </fieldset>
+        <div id="existing-users-section"></div>
+    </section>
+
+    <footer>
+        <div class="container">
+        <p>© 2025 Bavya Health Services Pvt Ltd. All rights reserved.</p>
+        <p>Contact us: <a href="mailto:hr@bhspl.in">info@bhspl.in</a></p>
+        </div>
+    </footer>
+
+    <script>
+        let allUsers = [];
+
+        // Load users from the API and render them
+        async function loadUsers() {
+            const res = await fetch("/users");
+            const contentType = res.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+                const users = await res.json();
+                allUsers = users;
+                renderUsers(users);
+            } else {
+                document.querySelector("#usersTable tbody").innerHTML =
+                    '<tr><td colspan="2" style="color:red;text-align:center;">Unable to load users. Please login as admin.</td></tr>';
+            }
+        }
+
+        function renderUsers(users) {
+            const tbody = document.querySelector("#usersTable tbody");
+            tbody.innerHTML = "";
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" id="noUserMsg" style="text-align:center;">No users found.</td></tr>';
+            } else {
+                users.forEach(user => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                    <td style="padding:10px 100px;">${user.username}</td>
+                    <td style="padding:10px 100px;">
+                        ${user.username !== "admin" ? `<button onclick="deleteUser('${user.username}')">Delete</button>` : ''}
+                    </td>`;
+                    tbody.appendChild(row);
+                });
+            }
+        }
+
+        function filterUsers() {
+            const search = document.getElementById("searchUser").value.trim().toLowerCase();
+            const filtered = allUsers.filter(u => u.username.toLowerCase().includes(search));
+            renderUsers(filtered);
+        }
+
+        async function deleteUser(username) {
+            const confirmed = confirm(`Are you sure you want to delete '${username}'?`);
+            if (!confirmed) return;
+
+            const res = await fetch("/delete-user", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ username })
+            });
+
+            if (res.ok) {
+                alert("User deleted");
+                loadUsers();
+            } else if (res.status === 404) {
+                alert("User Doesnot exist");
+            } else {
+                alert("Error deleting user");
+            }
+        }
+
+        // Load users on page load
+        loadUsers();
+    </script>
+</body>
+</html>
